@@ -6,8 +6,6 @@ import java.util.Map;
 
 final class CrockfordCodec {
 
-    private static final byte MAX_ROUND_LONG = Long.SIZE / 5 + 1;
-
     private static final char[] encodingMapping;
     private static final Map<Character, Byte> decodingMapping;
 
@@ -23,6 +21,9 @@ final class CrockfordCodec {
         for (char c : encodingMapping) {
             tmp.put(c, counter++);
         }
+        tmp.put('I', (byte) 1);
+        tmp.put('L', (byte) 1);
+        tmp.put('O', (byte) 0);
         decodingMapping = Collections.unmodifiableMap(tmp);
     }
 
@@ -32,7 +33,7 @@ final class CrockfordCodec {
     static String encode(long value) {
         long currentValue = value;
         final StringBuilder result = new StringBuilder();
-        for (byte counter = 1; counter < MAX_ROUND_LONG; counter++) {
+        for (byte counter = 1; counter < Tsid.MAX_STRING_LENGTH; counter++) {
             final byte symbolValue = (byte) (currentValue >>> (Long.SIZE - 5));
             result.append(encodingMapping[symbolValue]);
             currentValue <<= 5;
@@ -43,27 +44,21 @@ final class CrockfordCodec {
     }
 
     static long decode(String input) {
-        if (input == null) {
-            throw new NullPointerException("Input is null");
-        }
-        final String trimmedInput = input.trim();
-        if (trimmedInput.length() != MAX_ROUND_LONG) {
-            throw new IllegalArgumentException("Invalid input length: " + trimmedInput.length());
-        }
         long result = 0;
-        final char[] inputCharArray = trimmedInput.toUpperCase().toCharArray();
-        for (int i = 1; i < inputCharArray.length; i++) {
+        final char[] inputCharArray = input.toUpperCase().toCharArray();
+        for (int i = 0; i < (inputCharArray.length - 1); i++) {
             final char symbol = inputCharArray[i];
             if (!decodingMapping.containsKey(symbol)) {
                 throw new IllegalArgumentException("Invalid symbol: " + symbol);
             }
-            result += (((long) decodingMapping.get(symbol)) << (Long.SIZE - 5));
+            long shift = Long.SIZE - (5L * (i + 1));
+            result |= (((long) decodingMapping.get(symbol)) << shift);
         }
-        final char symbol = inputCharArray[MAX_ROUND_LONG - 1];
+        final char symbol = inputCharArray[Tsid.MAX_STRING_LENGTH - 1];
         if (!decodingMapping.containsKey(symbol)) {
             throw new IllegalArgumentException("Invalid symbol: " + symbol);
         }
-        result += decodingMapping.get(symbol);
+        result |= decodingMapping.get(symbol);
         return result;
     }
 }

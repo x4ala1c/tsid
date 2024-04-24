@@ -19,7 +19,14 @@ public final class TsidGenerator {
     }
 
     public static TsidGenerator defaultGenerator() {
-        return new TsidGenerator(TsidConfiguration.DEFAULT);
+        return new TsidGenerator(TsidConfiguration.fromEnvironment());
+    }
+
+    public static TsidGenerator generator(TsidConfiguration configuration) {
+        if (configuration == null) {
+            throw new NullPointerException(TsidErrorMessage.NULL_CONFIGURATION);
+        }
+        return new TsidGenerator(configuration);
     }
 
     public static TsidGenerator threadGenerator() {
@@ -32,7 +39,7 @@ public final class TsidGenerator {
 
     public static TsidGenerator threadGenerator(TsidConfiguration configuration) {
         if (configuration == null) {
-            throw new NullPointerException("Configuration is null");
+            throw new NullPointerException(TsidErrorMessage.NULL_CONFIGURATION);
         }
         final TsidConfiguration noNodeConfiguration = TsidConfiguration.builder()
                 .node((short) Thread.currentThread().getId())
@@ -43,14 +50,14 @@ public final class TsidGenerator {
 
     public static TsidGenerator globalGenerator() {
         if (instance == null) {
-            generateInstance(TsidConfiguration.DEFAULT);
+            generateInstance(TsidConfiguration.fromEnvironment());
         }
         return instance;
     }
 
     public static TsidGenerator globalGenerator(TsidConfiguration configuration) {
         if (configuration == null) {
-            throw new NullPointerException("Configuration is null");
+            throw new NullPointerException(TsidErrorMessage.NULL_CONFIGURATION);
         }
         if (instance == null) {
             generateInstance(configuration);
@@ -64,12 +71,22 @@ public final class TsidGenerator {
         }
     }
 
+    public static synchronized void reset() {
+        instance = null;
+    }
+
     public static Tsid globalGenerate() {
+        if (instance == null) {
+            generateInstance(TsidConfiguration.fromEnvironment());
+        }
         return instance.generate();
     }
 
     public synchronized Tsid generate() {
         long currentTimestamp = Instant.now().toEpochMilli();
+        if (currentTimestamp > TsidConfiguration.MAX_EPOCH) {
+            throw new IllegalStateException("Timestamp exceeded maximum allowed value");
+        }
         long currentSequence = this.prevSequence + 1;
         if (currentTimestamp > prevTimestamp) {
             currentSequence = RANDOM.nextInt(TsidConfiguration.MAX_SEQUENCE + 1);
@@ -81,8 +98,8 @@ public final class TsidGenerator {
         this.prevTimestamp = currentTimestamp;
         this.prevSequence = currentSequence;
         long result = (currentTimestamp - configuration.getEpoch()) << 22;
-        result |= (configuration.getNode() << 12);
+        result |= ((long) configuration.getNode() << 12);
         result |= currentSequence;
-        return new Tsid(result);
+        return Tsid.fromLong(result);
     }
 }
