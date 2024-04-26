@@ -4,6 +4,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Encoder/Decoder for {@link Tsid}. Converts the ID into Crockford's Base32 String and vice versa.
+ */
 final class CrockfordCodec {
 
     private static final char[] encodingMapping;
