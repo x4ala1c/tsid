@@ -11,6 +11,8 @@
     - [Snowflake ID from X (formerly known as Twitter)](https://en.wikipedia.org/wiki/Snowflake_ID)
     - [Discord's Snowflake implementation](https://discord.com/developers/docs/reference#snowflakes)
 
+---
+
 ## Introduction
 
 TSID (Time-Sorted ID) is a type of ID that balances well between the look of the UUID and its ability to support
@@ -27,6 +29,8 @@ Its value is a `long` value (64-bit signed integer) and consists of three parts,
    The starting of the sequence is securely randomized.
 
 The String form of the Tsid is in [Crockford's Base32.](https://www.crockford.com/base32.html)
+
+---
 
 ## Example
 
@@ -163,7 +167,11 @@ public class TsidConverter implements AttributeConverter<Tsid, Long> {
 - [The documentation on `@Convert`](https://jakarta.ee/specifications/platform/9/apidocs/jakarta/persistence/convert).
   Currently, it is not allowed to be accompanied by `@Id`.
 
+---
+
 ## Story
+
+### 2024-04-27
 
 The first project in my journey to find meaning.
 
@@ -177,7 +185,7 @@ And before I noticed, I have dived deeper into the rabbit hole of database IDs. 
 So, inspired by Vlad's implementation of TSID, and later on the series from [f4b6a3](https://github.com/f4b6a3), I
 created my own implementation.
 
-At first, I hosted this project on my main GitHub account ([here](https://github.com/vincentdaogithub/tsid)).
+At first, I hosted this project on my main GitHub account [here](https://github.com/vincentdaogithub/tsid).
 
 But things go awry in my personal life.
 
@@ -185,7 +193,85 @@ So yeah, I migrated the previous project into `x4ala1c` collection.
 
 I also plan to migrate two other projects into this collection, so stay tuned, I guess.
 
-2024-04-27 - Vincent Dao
+### 2024-04-28
+
+While I was running the tests using `mvn verify`, an error related to the use of reflection popped up:
+
+```
+Cannot access Java runtime internals to modify environment variables. Have a look at the documentation for possible solutions: https://junit-pioneer.org/docs/environment-variables/#warnings-for-reflective-access
+```
+
+This was due to some of my test uses [JUnit Pioneer](https://junit-pioneer.org/) to modify the environment's and
+system's variables.
+
+Accessing the [link](https://junit-pioneer.org/docs/environment-variables/#warnings-for-reflective-access), I found
+out that from java 9 and on, warnings related to "illegal reflective operation" would be displayed. Java 17 and above
+would instead throw
+an [error.](https://docs.oracle.com/en%2Fjava%2Fjavase%2F22%2Fdocs%2Fapi%2F%2F/java.base/java/lang/reflect/InaccessibleObjectException.html)
+
+The article by Baeldung explains in
+details [why this happened](https://www.baeldung.com/java-illegal-reflective-access).
+
+Since this only happened during testing, the plugin responsible was the `maven-surefire-plugin` one. But if Java 8
+allows reflective access, then how could this error happen?
+
+And well, after 2 hours of debugging, the problem was simple: I have multiple JDKs on my system. Since my JAVA_HOME was
+set to JDK 21, the reflective warnings were expected.
+
+So, I had to either set my JAVA_HOME back to 8, which was not ideal, because many of my projects used JDK version 17 or
+above, or...
+
+#### Solution
+
+```xml
+<!--pom.xml-->
+
+<profiles>
+    <profile>
+        <!-- Set up surefire so that if the tests are run in jdk > 1.8, then adding args to disable reflection errors. -->
+        <id>surefire-above-jdk8</id>
+        <activation>
+            <jdk>(1.8,)</jdk>
+        </activation>
+        <build>
+            <plugins>
+                <plugin>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>3.2.2</version>
+                    <configuration>
+                        <argLine>
+                            --add-opens java.base/java.util=ALL-UNNAMED
+                            --add-opens java.base/java.lang=ALL-UNNAMED
+                        </argLine>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </build>
+    </profile>
+</profiles>
+```
+
+Neet.
+
+I can define which versions I want to run the cmd
+args, [thanks to this specification by Maven](https://maven.apache.org/enforcer/enforcer-rules/versionRanges.html).
+
+The args are taken from either the Baeldung's article above, or from JUnit Jupiter's recommendation for dealing with
+reflective warnings.
+
+But why did I have to specify the version to be above 8? Couldn't I just apply the args straight to surefire?
+
+Technically, yes. But when I explicitly applied the args for all cases, then my IDE just refused to run the tests:
+
+```
+Unrecognized option: --add-opens
+Error: Could not create the Java Virtual Machine.
+Error: A fatal exception has occurred. Program will exit.
+```
+
+Yes, my IDE ran the tests in Java 8, while my Maven ran them in Java 21. Cool.
+
+---
 
 ## Credits
 
@@ -196,5 +282,5 @@ I also plan to migrate two other projects into this collection, so stay tuned, I
 ## License
 
 - This project is licensed under [MIT License](LICENSE).
-- The license also included the one from [f4b6a3](https://github.com/f4b6a3/tsid-creator/blob/master/LICENSE), as they
-  inspire this project.
+- The license also included the one from [f4b6a3](https://github.com/f4b6a3/tsid-creator/blob/master/LICENSE), since
+  they inspire this project.
