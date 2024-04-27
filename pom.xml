@@ -7,7 +7,7 @@
     <groupId>io.x4ala1c</groupId>
     <artifactId>tsid</artifactId>
     <version>1.0.0</version>
-    <description>Time-sorted ID based on Snowflake ID from X (formerly Twitter).</description>
+    <description>Time-Sorted ID based on Snowflake ID from X (former Twitter).</description>
 
     <name>tsid</name>
     <url>https://github.com/x4ala1c/tsid</url>

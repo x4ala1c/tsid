@@ -97,17 +97,17 @@ public final class TsidConfiguration {
         private Builder() {
         }
 
-        Builder node(int node) {
+        public Builder node(int node) {
             this.node = node;
             return this;
         }
 
-        Builder epoch(long epoch) {
+        public Builder epoch(long epoch) {
             this.epoch = epoch;
             return this;
         }
 
-        TsidConfiguration build() {
+        public TsidConfiguration build() {
             return new TsidConfiguration(node, epoch);
         }
     }
