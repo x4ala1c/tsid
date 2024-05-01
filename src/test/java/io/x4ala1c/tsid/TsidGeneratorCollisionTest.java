@@ -98,7 +98,7 @@ final class TsidGeneratorCollisionTest {
                 Assertions.fail(t.exception.getMessage(), t.exception);
             }
         });
-        Assertions.assertThat(resultTsidHolder).hasSizeLessThan(MAX_GENERATORS * maxTsidCount);
+        Assertions.assertThat(resultTsidHolder).size().isLessThanOrEqualTo(MAX_GENERATORS * maxTsidCount);
     }
 
     @Test
@@ -120,7 +120,7 @@ final class TsidGeneratorCollisionTest {
                 Assertions.fail(t.exception.getMessage(), t.exception);
             }
         });
-        Assertions.assertThat(resultTsidHolder).hasSize(maxThreadCount * maxTsidCount);
+        Assertions.assertThat(resultTsidHolder).size().isEqualTo(maxThreadCount * maxTsidCount);
     }
 
     private static final class GlobalGenerateCollisionTestThread extends Thread {
@@ -172,6 +172,6 @@ final class TsidGeneratorCollisionTest {
                 Assertions.fail(t.exception.getMessage(), t.exception);
             }
         });
-        Assertions.assertThat(resultTsidHolder).hasSize(maxThreadCount * maxTsidCount);
+        Assertions.assertThat(resultTsidHolder).size().isEqualTo(maxThreadCount * maxTsidCount);
     }
 }

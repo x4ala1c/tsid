@@ -1,5 +1,5 @@
 name: deploy-maven-github
-run-name: Running tests per push or pull request.
+run-name: Deploy to Maven Central and GitHub Package Registry.
 on:
   release:
     types:
@@ -7,44 +7,46 @@ on:
 
 jobs:
   run-unit-tests:
-    name: Running unit tests.
+    name: Running tests.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '8'
-
-      - run: mvn -B verify
-        timeout-minutes: 2
-
-  deploy-to-github:
-    name: Deploying the artifact to GitHub Package Registry
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Java for GitHub
+      - name: Set up Java for testing.
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '8'
 
-      - name: Build with Maven
-        run: mvn -B package -DskipTests=true
+      - name: Run tests.
+        run: mvn -B verify
+        timeout-minutes: 2
 
-      - name: Deploy to GitHub Package Registry
-        run: mvn deploy
-
-  deploy-to-maven:
-    name: Deploying the artifact to Maven Central
+  deploy-to-github:
+    name: Deploying the artifact to GitHub Package Registry.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Java for Maven Central
+      - name: Set up Java for GitHub.
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '8'
+
+      - name: Build with Maven.
+        run: mvn -B package -DskipTests=true
+
+      - name: Deploy to GitHub Package Registry.
+        run: mvn deploy
+
+  deploy-to-maven:
+    name: Deploying the artifact to Maven Central.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java for Maven Central.
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
@@ -55,8 +57,8 @@ jobs:
           gpg-private-key: {{secrets.GPG_SECRET_KEY}}
           gpg-passphrase: {{secrets.GPG_PASSPHRASE}}
 
-      - name: Build with Maven
+      - name: Build with Maven.
         run: mvn -B package -DskipTests=true -DgithubPackageDeploy=true
 
-      - name: Deploy to Maven Central
+      - name: Deploy to Maven Central.
         run: mvn deploy

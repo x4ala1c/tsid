@@ -10,9 +10,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+
+      - name: Set up Java for testing.
+        uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '8'
-      - run: mvn -B verify
+
+      - name: Run tests.
+        run: mvn -B verify
         timeout-minutes: 2
