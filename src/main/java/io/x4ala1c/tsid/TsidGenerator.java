@@ -159,6 +159,8 @@ public final class TsidGenerator {
         long currentSequence = this.prevSequence + 1;
         if (currentTimestamp > prevTimestamp) {
             currentSequence = RANDOM.nextInt(TsidConfiguration.MAX_SEQUENCE + 1);
+        } else if (currentTimestamp < prevTimestamp) {
+            throw new IllegalStateException("Current timestamp's generation is lower than previous timestamp");
         }
         if (currentSequence > TsidConfiguration.MAX_SEQUENCE) {
             currentSequence = RANDOM.nextInt(TsidConfiguration.MAX_SEQUENCE + 1);

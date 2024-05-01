@@ -1,0 +1,61 @@
+name: deploy-maven-github
+run-name: Running tests per push or pull request.
+on:
+  release:
+    types:
+      - released
+
+jobs:
+  run-unit-tests:
+    name: Running unit tests.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '8'
+
+      - run: mvn verify
+
+  deploy-to-github:
+    name: Deploying the artifact to GitHub Package Registry
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java for GitHub
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '8'
+
+      - name: Build with Maven
+        run: mvn -B package -DskipTests=true
+
+      - name: Deploy to GitHub Package Registry
+        run: mvn deploy
+
+  deploy-to-maven:
+    name: Deploying the artifact to Maven Central
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java for Maven Central
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '8'
+          server-id: central
+          server-username: {{secrets.MAVEN_USERNAME}}
+          server-password: {{secrets.MAVEN_PASSWORD}}
+          gpg-private-key: {{secrets.GPG_SECRET_KEY}}
+          gpg-passphrase: {{secrets.GPG_PASSPHRASE}}
+
+      - name: Build with Maven
+        run: mvn -B package -DskipTests=true -DgithubPackageDeploy=true
+
+      - name: Deploy to Maven Central
+        run: mvn deploy
