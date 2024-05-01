@@ -53,10 +53,10 @@ jobs:
           distribution: 'temurin'
           java-version: '8'
           server-id: central
-          server-username: {{secrets.MAVEN_USERNAME}}
-          server-password: {{secrets.MAVEN_PASSWORD}}
-          gpg-private-key: {{secrets.GPG_SECRET_KEY}}
-          gpg-passphrase: {{secrets.GPG_PASSPHRASE}}
+          server-username: ${{secrets.MAVEN_USERNAME}}
+          server-password: ${{secrets.MAVEN_PASSWORD}}
+          gpg-private-key: ${{secrets.GPG_SECRET_KEY}}
+          gpg-passphrase: ${{secrets.GPG_PASSPHRASE}}
 
       - name: Build with Maven.
         run: mvn -B package -DskipTests=true -DgithubPackageDeploy=true
