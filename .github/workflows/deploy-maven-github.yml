@@ -17,7 +17,8 @@ jobs:
           distribution: 'temurin'
           java-version: '8'
 
-      - run: mvn verify
+      - run: mvn -B verify
+        timeout-minutes: 2
 
   deploy-to-github:
     name: Deploying the artifact to GitHub Package Registry

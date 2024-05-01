@@ -15,3 +15,4 @@ jobs:
           distribution: 'temurin'
           java-version: '8'
       - run: mvn -B verify
+        timeout-minutes: 2
