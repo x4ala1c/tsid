@@ -1,4 +1,4 @@
-package io.x4ala1c.tsid;
+package io.github.x4ala1c.tsid;
 
 /**
  * Simple error message container.

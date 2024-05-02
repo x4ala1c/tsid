@@ -1,4 +1,4 @@
-package io.x4ala1c.tsid;
+package io.github.x4ala1c.tsid;
 
 import java.security.SecureRandom;
 import java.time.Instant;
