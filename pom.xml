@@ -6,7 +6,7 @@
 
     <groupId>io.github.x4ala1c</groupId>
     <artifactId>tsid</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
     <packaging>jar</packaging>
 
     <name>TSID</name>
