@@ -77,4 +77,14 @@ final class TsidTest {
     void testTsidToString() {
         Assertions.assertThat(tsidToTest.toString()).hasToString(tsidValueString);
     }
+
+    @Test
+    void testTsidComparable() {
+        final Tsid first = Tsid.fromLong(0);
+        final Tsid second = Tsid.fromLong(1);
+        Assertions.assertThat(first).isLessThan(second);
+        Assertions.assertThat(second).isGreaterThan(first);
+        final Tsid third = Tsid.fromLong(0);
+        Assertions.assertThat(first).isEqualByComparingTo(third);
+    }
 }

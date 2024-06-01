@@ -18,7 +18,7 @@ import java.util.Objects;
  * <p>
  * The String form of the Tsid is in <a href="https://www.crockford.com/base32.html">Crockford's Base32</a>.
  */
-public final class Tsid implements java.io.Serializable {
+public final class Tsid implements java.io.Serializable, Comparable<Tsid> {
 
     private static final long serialVersionUID = 1L;
     static final byte MAX_STRING_LENGTH = Long.SIZE / 5 + 1;
@@ -36,7 +36,6 @@ public final class Tsid implements java.io.Serializable {
      * Gets {@link Tsid} instance from {@code long} value. Must be non-negative.
      *
      * @param value The value of {@link Tsid} as long.
-     *
      * @return {@link Tsid} instance.
      */
     public static Tsid fromLong(long value) {
@@ -48,7 +47,6 @@ public final class Tsid implements java.io.Serializable {
      * Crockford's Base32 characters.
      *
      * @param value The value of {@link Tsid} in Crockford's Base32 encoding.
-     *
      * @return {@link Tsid} instance.
      */
     public static Tsid fromString(String value) {
@@ -97,5 +95,13 @@ public final class Tsid implements java.io.Serializable {
     @Override
     public String toString() {
         return asString();
+    }
+
+    @Override
+    public int compareTo(Tsid o) {
+        if (o == null) {
+            throw new NullPointerException("Other Tsid is null");
+        }
+        return Long.compare(this.value, o.value);
     }
 }
